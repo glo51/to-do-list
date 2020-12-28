@@ -3,6 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime, timedelta
 
+
 engine = create_engine('sqlite:///todo.db?check_same_thread=False')
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
@@ -63,10 +64,8 @@ def missed_tasks():
 
 
 def add_task():
-    print('\nEnter task')
-    new_task = input()
-    print('Enter deadline')
-    date = input().split('-')
+    new_task = input('\nEnter task: ')
+    date = input('Enter deadline (YYYY-MM-DD): ').split('-')
     new_row = Table(task=new_task, deadline=datetime(int(date[0]), int(date[1]), int(date[2])))
     session.add(new_row)
     session.commit()
@@ -80,10 +79,13 @@ def delete_task():
         for i, row in enumerate(rows, 1):
             print(f'{i}. {row.task}. {row.deadline.strftime("%e %b")}')
         which = int(input())
-        to_delete = ''
+        to_delete = None
         for i, row in enumerate(rows, 1):
             if i == which:
                 to_delete = row.task
+                break
+        if not to_delete:
+            return
         query = session.query(Table).filter(Table.task == to_delete)
         session.delete(query[0])
         session.commit()
@@ -92,7 +94,9 @@ def delete_task():
 
 
 while True:
-    print("\n1) Today's tasks\n2) Week's tasks\n3) All tasks\n4) Missed tasks\n5) Add task\n6) Delete task\n0) Exit")
+    print("\n1) Today's tasks\n2) Week's tasks\n3) All tasks\n"
+          "4) Missed tasks\n5) Add task\n6) Delete task\n0) Exit")
+
     answer = input()
     if answer == '0':
         break
